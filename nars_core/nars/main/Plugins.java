@@ -20,7 +20,7 @@ public class Plugins {
         n.addPlugin(new RuntimeNARSettings());
         n.addPlugin(new Emotions());
         n.addPlugin(new Anticipate());      // expect an event 
-        Term label = SetInt.make(new Term("bright"));
+        Term label = SetInt.make(new Term("BRIGHT"));
         int sensor_W = 5;
         int sensor_H = 5;
         n.addSensoryChannel(label.toString(),
