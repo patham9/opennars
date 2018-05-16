@@ -534,7 +534,7 @@ public class ConceptProcessing {
         Sentence s = new Sentence(
             mainSentence.term,
             mainSentence.punctuation,
-            new TruthValue(0.0f, 0.0f),
+            new TruthValue(0.0f, 0.33f),
             stamp);
 
         //s.producedByTemporalInduction = true; //also here to not go into sequence buffer
@@ -641,6 +641,7 @@ public class ConceptProcessing {
         Task negated2 = new Task(s2,concept.negConfirmation.getBudget().clone(),true);
         concept.memory.inputTask(negated1, false); //disappointed
         concept.memory.inputTask(negated2, false); //disappointed
+        concept.memory.inputTask(concept.negConfirmation, false);
         concept.memory.emit(OutputHandler.DISAPPOINT.class,((Statement) concept.negConfirmation.sentence.term).getPredicate());
         concept.negConfirmation = null;
     }
