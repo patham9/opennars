@@ -174,8 +174,9 @@ public class ConceptProcessing {
                                         break;
                                     }
                                 }
-
-                                int a = pred_conc.executable_preconditions.size();
+                                if(strongest_target == null) {
+                                    return;
+                                }
 
                                 //at first we have to remove the last one with same content from table
                                 int i_delete = -1;
