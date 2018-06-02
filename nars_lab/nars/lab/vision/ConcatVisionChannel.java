@@ -6,6 +6,7 @@ import nars.main.NAR;
 import nars.control.DerivationContext;
 import static nars.control.TemporalInferenceControl.proceedWithTemporalInduction;
 import nars.entity.Task;
+import nars.language.Term;
 import nars.plugin.perception.SensoryChannel;
 
 public class ConcatVisionChannel extends SensoryChannel {
@@ -16,7 +17,7 @@ public class ConcatVisionChannel extends SensoryChannel {
     
     Task[][] inputs;
     public ConcatVisionChannel(NAR nar, SensoryChannel reportResultsTo, int width, int height) {
-        super(nar,reportResultsTo, width, height, width*height);
+        super(nar,reportResultsTo, width, height, width*height, new Term("BRIGHT"));
         inputs = new Task[height][width];
     }
     

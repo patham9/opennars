@@ -23,15 +23,16 @@ public abstract class SensoryChannel implements Plugin, Serializable {
     public int duration = -1;
     Term label;
     public SensoryChannel(){}
-    public SensoryChannel(NAR nar, Collection<SensoryChannel> reportResultsTo, int width, int height, int duration) {
+    public SensoryChannel(NAR nar, Collection<SensoryChannel> reportResultsTo, int width, int height, int duration, Term label) {
         this.reportResultsTo = reportResultsTo;
         this.nar = nar;
         this.width = width;
         this.height = height;
         this.duration = duration;
+        this.label = label;
     }
-    public SensoryChannel(NAR nar, SensoryChannel reportResultsTo, int width, int height, int duration) {
-        this(nar, Arrays.asList(reportResultsTo), width, height, duration);
+    public SensoryChannel(NAR nar, SensoryChannel reportResultsTo, int width, int height, int duration, Term label) {
+        this(nar, Arrays.asList(reportResultsTo), width, height, duration, label);
     }
     public void addInput(final String text) {
         try {

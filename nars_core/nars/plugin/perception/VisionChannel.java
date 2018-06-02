@@ -30,7 +30,7 @@ public class VisionChannel extends SensoryChannel  {
     boolean HadNewInput = false; //only generate frames if at least something was input since last "commit to NAR"
     public EventEmitter.EventObserver obs;
     public VisionChannel(Term label, NAR nar, SensoryChannel reportResultsTo, int width, int height, int duration) {
-        super(nar,reportResultsTo, width, height, duration);
+        super(nar,reportResultsTo, width, height, duration, label);
         this.nar = nar;
         this.label = label;
         inputs = new double[height][width];
