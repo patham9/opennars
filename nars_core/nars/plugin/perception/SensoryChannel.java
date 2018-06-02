@@ -12,14 +12,16 @@ import nars.main.NAR;
 import nars.entity.Concept;
 import nars.entity.Task;
 import nars.language.Term;
+import nars.plugin.Plugin;
 
-public abstract class SensoryChannel implements Serializable {
+public abstract class SensoryChannel implements Plugin, Serializable {
     private Collection<SensoryChannel> reportResultsTo;
     public NAR nar; //for top-down influence of concept budgets
     public List<Task> results = new ArrayList<Task>();
     public int height = 0; //1D channels have height 1
     public int width = 0;
     public int duration = -1;
+    Term label;
     public SensoryChannel(){}
     public SensoryChannel(NAR nar, Collection<SensoryChannel> reportResultsTo, int width, int height, int duration) {
         this.reportResultsTo = reportResultsTo;
@@ -68,5 +70,9 @@ public abstract class SensoryChannel implements Serializable {
             }
         }
         return 0.0;
+    }
+    
+    public String getName() {
+        return label.toString();
     }
 }

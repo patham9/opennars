@@ -110,7 +110,7 @@ public class NAR extends SensoryChannel implements Serializable,Runnable {
      * The memory of the reasoner
      */
     public Memory memory;
-    
+
     
     public static class Lock extends Object implements Serializable { }
     //Because AtomicInteger/Double ot supported by teavm
@@ -385,6 +385,9 @@ public class NAR extends SensoryChannel implements Serializable,Runnable {
     }
 
     public void addPlugin(Plugin p) {
+        if(p instanceof SensoryChannel) {
+            this.addSensoryChannel(((SensoryChannel) p).getName(), (SensoryChannel) p);
+        }
         if (p instanceof Operator) {
             memory.addOperator((Operator)p);
         }
@@ -398,6 +401,9 @@ public class NAR extends SensoryChannel implements Serializable,Runnable {
             Plugin p = ps.plugin;
             if (p instanceof Operator) {
                 memory.removeOperator((Operator)p);
+            }
+            if (p instanceof SensoryChannel) {
+                sensoryChannels.remove(p);
             }
             //TODO sensory channels can be plugins
             ps.setEnabled(false);
