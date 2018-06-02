@@ -76,4 +76,10 @@ public abstract class SensoryChannel implements Plugin, Serializable {
     public String getName() {
         return label.toString();
     }
+    
+    public void setName(String val) {
+        this.label = new Term(val);
+        this.nar.removePlugin(this.nar.new PluginState(this));
+        this.nar.addPlugin(this);
+    }
 }
