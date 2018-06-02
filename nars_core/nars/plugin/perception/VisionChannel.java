@@ -19,7 +19,7 @@ import nars.language.Term;
 import nars.main.Parameters;
 
 public class VisionChannel extends SensoryChannel  {
-    public float DEFAULT_OUTPUT_CONFIDENCE = 0.2f;
+    public float DEFAULT_OUTPUT_CONFIDENCE = 0.1f;
     double[][] inputs;
     boolean[][] updated;
     int cnt_updated = 0;

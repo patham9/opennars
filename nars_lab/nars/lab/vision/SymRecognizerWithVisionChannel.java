@@ -20,6 +20,9 @@ import nars.main.Parameters;
 import nars.entity.Sentence;
 import nars.io.events.AnswerHandler;
 import nars.io.Narsese;
+import nars.language.SetInt;
+import nars.language.Term;
+import nars.plugin.perception.VisionChannel;
 
 
 
@@ -35,15 +38,15 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
         return resizedimage;
     }
     
-    static int SZ = 5;
+    final static int SIZE = 10;
     private void canvasMousePressed(MouseEvent evt) {
-        int X = evt.getX()/(jLabel1.getWidth() / SZ);
-        int Y = evt.getY()/(jLabel1.getHeight() / SZ);
+        int X = evt.getX()/(jLabel1.getWidth() / SIZE);
+        int Y = evt.getY()/(jLabel1.getHeight() / SIZE);
         
         int RAD = 0;
         for(int x=X-RAD;x<X+RAD+1;x++) {
             for(int y=Y-RAD;y<Y+RAD+1;y++) {
-                if(x<0 || y<0 || x>=SZ || y>=SZ) {
+                if(x<0 || y<0 || x>=SIZE || y>=SIZE) {
                     continue;
                 }
                 float dx = Math.abs(X-x);
@@ -55,7 +58,7 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
                 //maxDistance*=maxDistance;
                 float R = 255.0f;// - 255.0f*(distance / maxDistance);
                 Color col1 = new Color(canvasIMG.getRGB(x, y));
-                R*=0.2;
+                R*=0.4;
                 R+=col1.getRed();
                 if(R > 255) {
                     R = 255;
@@ -63,7 +66,7 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
                 if(R < 0) {
                     R = 0;
                 }
-
+               //R = 255;
                 canvasIMG.setRGB(x,y, new Color((int)R,(int)R,(int)R).getRGB());
             }
         }
@@ -79,8 +82,8 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
         initComponents();
         invar.setSelected(true);
         jButton3.setForeground(Color.RED);
-        exampleIMG = new BufferedImage(SZ*10,SZ*10,BufferedImage.TYPE_INT_RGB);
-        canvasIMG = new BufferedImage(SZ,SZ,BufferedImage.TYPE_INT_RGB);
+        exampleIMG = new BufferedImage(SIZE*10,SIZE*10,BufferedImage.TYPE_INT_RGB);
+        canvasIMG = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_RGB);
         //JLabel picLabel = new JLabel(new ImageIcon(canvasIMG));
         jLabel1.setIcon(new ImageIcon(fitimage(canvasIMG,jLabel1.getWidth(), jLabel1.getHeight())));
         estimate.setIcon(new ImageIcon(fitimage(exampleIMG,estimate.getWidth(), estimate.getHeight())));
@@ -242,7 +245,7 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        canvasIMG = new BufferedImage(SZ,SZ,BufferedImage.TYPE_INT_RGB);
+        canvasIMG = new BufferedImage(SIZE,SIZE,BufferedImage.TYPE_INT_RGB);
         jLabel1.setIcon(new ImageIcon(fitimage(canvasIMG,jLabel1.getWidth(), jLabel1.getHeight())));
         inputPanel.setText("");
         inputPanel2.setText("");
@@ -250,17 +253,17 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     public void clear() {
-        int max_per_row = exampleIMG.getWidth()/(scale_palette*SZ);
+        int max_per_row = exampleIMG.getWidth()/(scale_palette*SIZE);
         for(int k=0;k<max_per_row;k+=1) {
             for(int j=0;;j+=1) {
                 boolean break3 = false;
-                for(int x=0;x<SZ*scale_palette;x+=1) {
-                    for(int y=0;y<SZ*scale_palette;y+=1) {
-                        int Y = y+(3*j+1)*scale_palette*SZ;
+                for(int x=0;x<SIZE*scale_palette;x+=1) {
+                    for(int y=0;y<SIZE*scale_palette;y+=1) {
+                        int Y = y+(3*j+1)*scale_palette*SIZE;
                         if(Y >= exampleIMG.getHeight()) {
                             break3=true;break;
                         }
-                        exampleIMG.setRGB(x+k*scale_palette*SZ, Y, 
+                        exampleIMG.setRGB(x+k*scale_palette*SIZE, Y, 
                                 Color.BLACK.getRGB());
                     }
                 }
@@ -294,6 +297,9 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
         //Parameters.SEQUENCE_BAG_SIZE=10000;
     }
     
+    int sensor_W = SIZE;
+    int sensor_H = SIZE;
+    static String LABEL = "WHITE";
     NAR nar = null;
     NARSwing gui = null;
     ArrayList<AnswerHandler> q = new ArrayList<AnswerHandler>();
@@ -303,43 +309,50 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
         StringBuilder build = new StringBuilder();
         StringBuilder build2 = new StringBuilder();
         build2.append("<(&|,");
-        for(int x=0;x<SZ;x+=1) {
-            for(int y=0;y<SZ;y+=1) {
+        for(int x=0;x<SIZE;x+=1) {
+            for(int y=0;y<SIZE;y+=1) {
                 int used_X = x;
                 int used_Y = y;
+                float USED_X = 2.0f*(used_X / (float) (sensor_W-1))-1.0f;
+                float USED_Y = 2.0f*(used_Y / (float) (sensor_H-1))-1.0f;
                 Color col1 = new Color(canvasIMG.getRGB(x, y));
                 
                 float col = ((float)col1.getRed()) / 255.0f;
-                if(col > 0.0) { 
+                //if(col > 0.0) { 
                     float freq = 0.5f+(col - 0.5f);
                     if(invar.isSelected()) {
-                        build.append("<p["+String.valueOf(used_X)+","+String.valueOf(used_Y)+"] --> [on]>. :|: %"+String.valueOf(freq)+"%");
+                        build.append("<{p"+exid+"["+String.valueOf(USED_X)+","+String.valueOf(USED_Y)+"]} --> ["+LABEL+"]>. %"+String.valueOf(freq)+"%");
                         build.append("\n");
-                        build2.append("<p["+String.valueOf(used_X)+","+String.valueOf(used_Y)+"] --> [on]>,");
+                        build2.append("<{p"+exid+"["+String.valueOf(USED_X)+","+String.valueOf(USED_Y)+"]} --> ["+LABEL+"]>,");
                     } else {
-                        build.append("<p_"+String.valueOf(used_X)+"_"+String.valueOf(used_Y)+" --> [on]>. :|: %"+String.valueOf(freq)+"%");
+                        build.append("<{p"+exid+"["+String.valueOf(USED_X)+","+String.valueOf(USED_Y)+"]} --> ["+LABEL+"]>. %"+String.valueOf(freq)+"%");
                         build.append("\n");
-                        build2.append("<p_"+String.valueOf(used_X)+"_"+String.valueOf(used_Y)+" --> [on]>,");
+                        build2.append("<{p"+exid+"["+String.valueOf(USED_X)+"_"+String.valueOf(USED_Y)+"]} --> ["+LABEL+"]>,");
                     }
-                }
+                //}
             }
         }
-        String s2 = build2.toString();
-        s2 = s2.substring(0, s2.length()-1);
-        s2=s2+")";
+        
+        if(evt==null) {
+            build.append("<{p"+exid+"} --> (*,example"+exid+")>.");
+        }
+        //s2 = s2.substring(0, s2.length()-1);
+        //s2=s2+")";
         inputPanel.setText(build.toString());
         
         if(evt == null) {
-            String question = "<{?what} --> [observed]>?";
-            additional[exid]=s2+" ==> <{example"+exid+"} --> [observed]>>.";
-            inputPanel2.setText(additional[exid]+"\n"+question);
+            //String question = "<{?what} --> [observed]>?";
+            additional[exid]=build.toString();
+            //inputPanel2.setText(additional[exid]+"\n"+question);
+            //inputPanel2.setText(s2);
         }
         else {
             
             nar = new NAR(); //add vision channel for [on] property
             //to the nar instance, and nar is also the "next higher" sensory channel
             //to report the results to
-            nar.addSensoryChannel("[on]", new SpatialSamplingVisionChannel(nar, nar, SZ, SZ));
+            Term label = SetInt.make(new Term(LABEL));
+            nar.addSensoryChannel(label.toString(), new VisionChannel(label, nar, nar, sensor_H, sensor_W, sensor_W*sensor_H));
             
             if(invar1.isSelected()) {
                 gui = new NARSwing(nar);
@@ -348,7 +361,7 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
             int u = 0;
             inputPanel2.setText("");
             //for(String s : questions) {
-            String s = question; {
+            String s = "<{p"+exid+"} --> (*,?what)>?"; {
                 if(s!=null) {
                     AnswerHandler cur = new AnswerHandler() {
                         @Override
@@ -358,14 +371,14 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
                             float howconf = belief.truth.getConfidence();
                             if(howconf >= 0.001f) { //only mark if above 0.1 confidence
                                 //also mark image:
-                                int maxu = Integer.valueOf(belief.getTerm().toString().split("example")[1].split("}")[0]);
+                                int maxu = Integer.valueOf(belief.getTerm().toString().split("example")[1].split("\\)")[0]);
                                 clear();
-                                for(int x=0;x<SZ*scale_palette;x+=1) {
-                                    for(int y=0;y<SZ*scale_palette;y+=1) {
+                                for(int x=0;x<SIZE*scale_palette;x+=1) {
+                                    for(int y=0;y<SIZE*scale_palette;y+=1) {
                                         Color col = new Color(canvasIMG.getRGB(x/scale_palette, y/scale_palette));
                                         int k = getK[maxu];
                                         int j = getJ[maxu];
-                                        exampleIMG.setRGB(x+k*scale_palette*SZ, y+(3*j+1)*scale_palette*SZ, 
+                                        exampleIMG.setRGB(x+k*scale_palette*SIZE, y+(3*j+1)*scale_palette*SIZE, 
                                                 new Color(col.getRed(),0,0).getRGB());
                                     }
                                 }
@@ -379,6 +392,7 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
                         for(int h=0;h<exid;h++) {
                             inputPanel2.setText(inputPanel2.getText()+additional[h]+"\n");
                             nar.addInput(additional[h]);
+                            System.out.println(additional[h]);
                         }
                         
                         inputPanel2.setText(inputPanel2.getText()+s+"\n");
@@ -391,13 +405,16 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
             }
             nar.param.noiseLevel.set(0);
             nar.addInput(inputPanel.getText());
+            nar.addInput(s);
+            System.out.println("///////////////////");
+            System.out.println(inputPanel.getText());
+            System.out.println(s);
             nar.start(0);
         }
     }//GEN-LAST:event_jButton3ActionPerformed
 
     int maxExamples = 50;
     //String[] questions = new String[maxExamples];
-    String question ="<{?what} --> [observed]>?";
     String[] additional = new String[maxExamples];
     int k =0;
     int j=0;
@@ -406,17 +423,17 @@ public class SymRecognizerWithVisionChannel extends javax.swing.JFrame {
     int[] getK= new int[maxExamples];
     private void addPatternButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addPatternButtonActionPerformed
         invar.setEnabled(false);
-        for(int x=0;x<SZ*scale_palette;x+=1) {
-            for(int y=0;y<SZ*scale_palette;y+=1) {
+        for(int x=0;x<SIZE*scale_palette;x+=1) {
+            for(int y=0;y<SIZE*scale_palette;y+=1) {
                 Color col = new Color(canvasIMG.getRGB(x/scale_palette, y/scale_palette));
-                exampleIMG.setRGB(x+k*scale_palette*SZ, y+3*j*scale_palette*SZ, 
+                exampleIMG.setRGB(x+k*scale_palette*SIZE, y+3*j*scale_palette*SIZE, 
                         col.getRGB());
             }
         }
         estimate.setIcon(new ImageIcon(fitimage(exampleIMG,estimate.getWidth(), estimate.getHeight())));
         estimate.repaint();
         jButton3ActionPerformed(null);
-        int max_per_row = exampleIMG.getWidth()/(scale_palette*SZ);
+        int max_per_row = exampleIMG.getWidth()/(scale_palette*SIZE);
         int index=max_per_row*j+k;
         //questions[index]=inputPanel2.getText();
         getJ[index]=j;
